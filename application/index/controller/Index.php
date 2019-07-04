@@ -3,6 +3,7 @@
 namespace app\index\controller;
 
 use think\Db;
+use app\index\model\Users;
 
 class Index
 {
@@ -14,4 +15,11 @@ class Index
     {
         return json(Db::query('select * from test'));
     }
+    public function Index3($p, $q)
+    {
+        echo $q;
+        $user = Users::get($p);
+        echo $user->name;
+    }
 }
+?>
