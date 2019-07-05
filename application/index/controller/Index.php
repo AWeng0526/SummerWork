@@ -21,5 +21,8 @@ class Index
         $user = Users::get($p);
         echo $user->name;
     }
+    public function test()
+    {
+        echo "this is a test";
+    }
 }
-?>

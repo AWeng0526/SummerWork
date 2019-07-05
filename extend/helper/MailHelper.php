@@ -14,10 +14,10 @@ class MailHelper
     private $username;
     private $password;
     private $host;
-    public $fromName;
-    public $charSet = 'UTF-8';
-    public $encoding = 'base64';
-    public $port = 587;
+    public  $fromName;
+    public  $charSet = 'UTF-8';
+    public  $encoding = 'base64';
+    public  $port = 587;
 
     /**
      * 构造函数
