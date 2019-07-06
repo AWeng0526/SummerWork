@@ -10,23 +10,22 @@
     <script src="../../../node_modules/jquery/dist/jquery.js"></script>
     <script src="../../../node_modules/bootstrap/dist/js/bootstrap.js"></script>
     <script>
-        function showData() {
-            $('#table1 .item').remove();
-            $.ajax({
-                type: 'get',
-                url: 'init.php',
-                success: function (data) {
-                    data = JSON.parse(data);
-                    $.each(data, function (i, o) {
-                        $('#table1').append("<tr class='item'><td>" + this.username + "</td><td>" +
-                            this.password + "</td><td>" + this.time +
-                            "</td><tr>")
-                    })
-                }
-            })
-        }
         $(function () {
-            showData();
+
+            let page = GetQueryString('page');
+            if (!page) {
+                page = 1;
+            }
+            let maxPage = 0;
+            $.ajax({
+                type: "get",
+                url: "count.php",
+                async: false,
+                success: function (response) {
+                    maxPage = JSON.parse(response).count;
+                }
+            });
+            initPage(page);
             $('#addBtn').click(function () {
                 let $data = {
                     username: $("#addUsername").val(),
@@ -37,11 +36,12 @@
                     url: "add.php",
                     data: $data,
                     success: function () {
-                        showData();
+                        initPage(1);
+                        $('#addModal').modal('hide');
                     }
                 });
-                window.location.reload();
             });
+
             $('#updateBtn').click(function () {
                 let $data = {
                     username: $("#updateUsername").val(),
@@ -52,11 +52,12 @@
                     url: "update.php",
                     data: $data,
                     success: function () {
-                        showData();
+                        initPage();
+                        $('#addModal').modal('hide');
                     }
                 });
-                window.location.reload();
             });
+
             $('#deleteBtn').click(function () {
                 let $data = {
                     username: $("#deleteUsername").val(),
@@ -66,35 +67,88 @@
                     url: "delete.php",
                     data: $data,
                     success: function () {
-                        showData();
+                        initPage(page);
+                        $('#addModal').modal('hide');
                     }
                 });
-                window.location.reload();
-            });
-            // $('#selectBtn').click(function () {
-            //     let $data = {
-            //         username: $("#selectUsername").val(),
-            //     };
-            //     $.ajax({
-            //         type: 'post',
-            //         url: "select.php",
-            //         data: $data,
-            //         success: function (data) {
-            //             window.location.reload();
-            //             $('#table1 .item').remove();
-            //             data = JSON.parse(data);
-            //             $.each(data, function (i, o) {
-            //                 $('#table1').append("<tr class='item'><td>" + this
-            //                     .username + "</td><td>" +
-            //                     this.password + "</td><td>" + this.time +
-            //                     "</td><tr>")
-            //             })
-            //         }
-            //     });
-                
-            // });
 
-        })
+            });
+
+            $('#selectBtn').click(function () {
+                let $data = {
+                    username: $("#selectUsername").val(),
+                };
+                $.ajax({
+                    type: 'post',
+                    url: "select.php",
+                    data: $data,
+                    success: function (data) {
+                        $('#table1 .item').remove();
+                        data = JSON.parse(data);
+                        $('#table1').append("<tr class='item'><td>" + data
+                            .username + "</td><td>" +
+                            data.password + "</td><td>" + data.time +
+                            "</td><tr>");
+                        $('#selectModal').modal('hide');
+                    }
+                });
+
+            });
+
+            $(".limitBtn").click(function () {
+                switch (this.id) {
+                    case "beginModal":
+                        initPage(1);
+                        break;
+                    case "preModal":
+                        if (page) {
+                            initPage(page - 1);
+                        } else {
+                            alert('已经是第一页了');
+                        }
+                        break;
+                    case "nextModal":
+                        console.log(maxPage);
+                        if (page < maxPage) {
+                            initPage(page + 1);
+                        } else {
+                            alert('已经是最后一页了');
+                        }
+                        break;;
+                    case "endModal":
+                        initPage(1);
+                        break;
+                }
+            })
+        });
+
+        function initPage(page) {
+            //window.location.href = "http://summerwork.com:8087/public/base/work1/tables.html?page=" + page;
+            $.ajax({
+                type: 'post',
+                url: 'limit.php',
+                data: {
+                    "page": page
+                },
+                success: function (data) {
+                    $('#table1 .item').remove();
+                    data = JSON.parse(data);
+                    $.each(data, function (i, o) {
+                        $('#table1').append("<tr class='item'><td>" + this
+                            .username + "</td><td>" +
+                            this.password + "</td><td>" + this.time +
+                            "</td><tr>")
+                    });
+                }
+            })
+        }
+
+        function GetQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+        }
     </script>
     <title>Document</title>
 </head>
@@ -109,9 +163,11 @@
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#deleteModal">
         删除数据
     </button>
-    <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#selectModal">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#selectModal">
         查询数据
-    </button> -->
+    </button>
+
+
     <table class="table table-bordered" id='table1'>
         <tr>
             <th>名称</th>
@@ -231,6 +287,19 @@
         </div>
     </div>
 
+
+    <button type="button" class="btn btn-primary limitBtn" data-toggle="modal" id="#beginModal">
+        首页
+    </button>
+    <button type="button" class="btn btn-primary limitBtn" data-toggle="modal" id="#preModal">
+        上一页
+    </button>
+    <button type="button" class="btn btn-primary limitBtn" data-toggle="modal" id="#nextModal">
+        下一页
+    </button>
+    <button type="button" class="btn btn-primary limitBtn" data-toggle="modal" id="#endModal">
+        尾页
+    </button>
 </body>
 
 </html>

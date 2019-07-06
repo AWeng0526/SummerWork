@@ -1,13 +1,10 @@
 <?php
 
-require "connect.php";
-$username = $_REQUEST['username'];
+use app\pdo\MyPdo;
 
-$sql = 'select * from users where username=:username';
-$pdostmt = $pdo->prepare($sql);
-$result = $pdostmt->execute([
-    'username' => $username
-]);
-$pdostmt->setFetchMode(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
-$rows = $pdostmt->fetch();
-echo json_encode($rows);
+require "MyPdo.php";
+require "config.php";
+$pdo = new MyPdo($dsn, $username, $password);
+$username = $_REQUEST['username'];
+$data = $pdo->table('users')->where('username =' . $username)->find();
+echo json_encode($data);

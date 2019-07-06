@@ -6,4 +6,4 @@ require "MyPdo.php";
 require "config.php";
 $pdo = new MyPdo($dsn, $username, $password);
 $data = $pdo->table('users')->select();
-echo json_encode($data);
+echo json_encode(["count" => ceil(count($data) / 3)]);
