@@ -97,26 +97,25 @@
 
             $(".limitBtn").click(function () {
                 switch (this.id) {
-                    case "beginModal":
+                    case "#beginModal":
                         initPage(1);
                         break;
-                    case "preModal":
-                        if (page) {
-                            initPage(page - 1);
+                    case "#preModal":
+                        if (page>1) {
+                            initPage(--page);
                         } else {
                             alert('已经是第一页了');
                         }
                         break;
-                    case "nextModal":
-                        console.log(maxPage);
+                    case "#nextModal":
                         if (page < maxPage) {
-                            initPage(page + 1);
+                            initPage(++page);
                         } else {
                             alert('已经是最后一页了');
                         }
                         break;;
-                    case "endModal":
-                        initPage(1);
+                    case "#endModal":
+                        initPage(maxPage);
                         break;
                 }
             })
